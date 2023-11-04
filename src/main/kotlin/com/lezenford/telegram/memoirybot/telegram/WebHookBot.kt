@@ -57,7 +57,7 @@ class WebHookBot(
                 }
             }
         } catch (e: Exception) {
-            log.error("Receive message error: ${e.message}", e)
+            log.error("Receive message error: ${objectMapper.writeValueAsString(update)}", e)
         }
         return null
     }

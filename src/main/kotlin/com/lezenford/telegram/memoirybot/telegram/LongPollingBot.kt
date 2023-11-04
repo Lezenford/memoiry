@@ -66,7 +66,7 @@ class LongPollingBot(
                                 sendMessage(answer)
                             }
                         } catch (e: Exception) {
-                            log.error("Receive update error: ${e.message}", e)
+                            log.error("Receive update error: ${objectMapper.writeValueAsString(it)}", e)
                         }
                         offset = max(offset, it.updateId + 1)
                     }

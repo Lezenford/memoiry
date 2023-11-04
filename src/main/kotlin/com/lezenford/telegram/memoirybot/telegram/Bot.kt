@@ -58,7 +58,7 @@ abstract class Bot : CommandLineRunner, CoroutineScope {
     }
 
     suspend fun <T : Serializable> sendMessage(message: BotApiMethod<T>): T? {
-        log.info("Client request ${objectMapper.writeValueAsString(message)}")
+        log.debug("Client request ${objectMapper.writeValueAsString(message)}")
         return telegramWebClient.post()
             .uri(message.method)
             .contentType(MediaType.APPLICATION_JSON)
@@ -67,9 +67,10 @@ abstract class Bot : CommandLineRunner, CoroutineScope {
                 when {
                     response.statusCode().is2xxSuccessful -> {
                         val awaitBody = response.awaitBody<String>()
-                        log.info("Telegram response: $awaitBody")
+                        log.debug("Telegram response: $awaitBody")
                         message.deserializeResponse(awaitBody)
                     }
+
                     response.statusCode().is4xxClientError -> {
                         throw TelegramApiException(response.awaitBody<ApiResponse<Unit>>())
                     }
