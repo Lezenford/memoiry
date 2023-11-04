@@ -1,0 +1,13 @@
+version: "3.9"
+services:
+  memoiry-postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: "memoiry-bot-db"
+      POSTGRES_USER: "memoiry"
+      POSTGRES_PASSWORD: "memoiry"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    volumes:
+      - ~/docker/memoiry:/var/lib/postgresql/data
+    ports:
+      - "5421:5432"

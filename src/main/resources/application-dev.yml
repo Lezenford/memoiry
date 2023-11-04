@@ -1,0 +1,12 @@
+spring:
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5421/memoiry-bot-db
+    username: memoiry
+    password: memoiry
+  flyway:
+    url: jdbc:postgresql://localhost:5421/memoiry-bot-db
+    user: memoiry
+    password: memoiry
+
+telegram:
+  type: long_polling
