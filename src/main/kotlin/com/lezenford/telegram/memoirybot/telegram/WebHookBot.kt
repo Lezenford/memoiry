@@ -8,18 +8,20 @@ import com.lezenford.telegram.memoirybot.telegram.handler.InlineHandler
 import com.lezenford.telegram.memoirybot.telegram.handler.ScriptHandler
 import kotlinx.coroutines.runBlocking
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
-import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.reactive.function.client.WebClient
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod
 import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook
 import org.telegram.telegrambots.meta.api.objects.Update
 import java.util.UUID
 
-@Component
+@RestController
+@RequestMapping("\${telegram.webhook.prefix:${TelegramProperties.WebHook.DEFAULT_PREFIX}}")
 @ConditionalOnProperty(value = ["telegram.type"], havingValue = "webhook")
 class WebHookBot(
     override val telegramWebClient: WebClient,
@@ -37,6 +39,9 @@ class WebHookBot(
                 SetWebhook.builder()
                     .secretToken(properties.secretToken)
                     .url("${properties.webhook.url}/${properties.webhook.prefix}/${properties.tokenHash}")
+                    .apply {
+                        properties.webhook.ipAddress?.also { ipAddress(it) }
+                    }
                     .build()
             )
         }

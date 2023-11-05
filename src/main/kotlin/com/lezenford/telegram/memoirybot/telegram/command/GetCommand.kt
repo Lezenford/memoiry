@@ -15,7 +15,7 @@ class GetCommand(
 
     override suspend fun action(update: Update): SendMessage? {
         val builder = SendMessage.builder().chatId(update.message.chatId)
-        val key = update.message?.text?.split(" ")?.drop(1)?.firstOrNull()
+        val key = update.message?.text?.replaceFirst("$COMMAND_INIT_CHARACTER$command ", "")
             ?: return builder.text("Вы забыли ввести название заметки, попробуйте еще раз").build()
 
         val hint = hintService.find(update.message.from.id, key)

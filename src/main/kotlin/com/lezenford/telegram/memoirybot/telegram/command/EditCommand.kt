@@ -18,7 +18,7 @@ class EditCommand(
     override suspend fun action(update: Update): SendMessage? {
         val chatId = update.message.chatId
         val builder = SendMessage.builder().chatId(chatId)
-        val key = update.message?.text?.split(" ")?.drop(1)?.firstOrNull()
+        val key = update.message?.text?.replaceFirst("$COMMAND_INIT_CHARACTER$command ", "")
             ?: return builder.text("Вы забыли ввести название заметки, попробуйте еще раз").build()
         var hint = hintService.find(update.message.from.id, key)
             ?: return builder.text("Заметка $key не найдена. Проверьте список существующих заметок /list").build()

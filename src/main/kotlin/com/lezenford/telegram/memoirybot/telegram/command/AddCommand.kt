@@ -21,18 +21,18 @@ class AddCommand(
         val builder = SendMessage.builder().chatId(chatId)
         return builder.text("Введите название для вашей заметки")
             .build().apply {
-                scriptHandler.addScript(chatId) { message ->
+                scriptHandler.addScript(chatId) key@{ message ->
                     if (message.text.length > 255) {
-                        return@addScript builder.text("Слишком длинное название, попробуйте еще раз /add").build()
+                        return@key builder.text("Слишком длинное название, попробуйте еще раз /add").build()
                     }
                     val key = message.text
                     hintService.find(message.from.id, key)?.also {
-                        return@addScript builder.text("Такая заметка уже существует, вы можете ее посмотреть /get")
+                        return@key builder.text("Такая заметка уже существует, вы можете ее посмотреть /get")
                             .build()
                     }
-                    return@addScript builder.text("Что положить в заметку?").build().apply {
-                        scriptHandler.addScript(chatId) { message ->
-                            return@addScript when {
+                    return@key builder.text("Что положить в заметку?").build().apply {
+                        scriptHandler.addScript(chatId) value@{ message ->
+                            return@value when {
                                 message.hasPhoto() || message.hasAudio() || message.hasAnimation() || message.hasContact() || message.hasDice() || message.hasDocument() || message.hasLocation() || message.hasInvoice() || message.hasPassportData() || message.hasPoll() ->
                                     builder.text("К сожалению, это нельзя сохранить в заметки. Попробуйте снова /add")
                                         .build()

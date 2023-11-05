@@ -24,6 +24,7 @@ data class TelegramProperties @ConstructorBinding constructor(
     data class WebHook(
         val url: String = "",
         val prefix: String = DEFAULT_PREFIX,
+        val ipAddress: String? = null
     ){
         companion object {
             const val DEFAULT_PREFIX = "telegram"
