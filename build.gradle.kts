@@ -1,83 +1,74 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("org.springframework.boot") version "3.1.5"
-    id("io.spring.dependency-management") version "1.1.3"
-    kotlin("jvm") version "1.9.20"
-    kotlin("plugin.spring") version "1.9.20"
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.ktor)
 }
 
-group = "com.lezenford.telegram"
-version = "0.1"
+group = "com.lezenford.telegram.memoiry"
+version = "2.0"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_24
+    targetCompatibility = JavaVersion.VERSION_24
 }
 
-configurations {
-    compileOnly {
-        extendsFrom(configurations.annotationProcessor.get())
+ktor {
+    docker {
+        jreVersion = JavaVersion.VERSION_25
+        localImageName = "cr.yandex/crp7ivvonmm5cmci2uht/memoiry"
+        imageTag = "$version"
     }
 }
 
-repositories {
-    mavenCentral()
+jib {
+    dockerClient {
+        this.executable = "/opt/homebrew/bin/docker"
+    }
+
+    container {
+        jvmFlags = listOf(
+            "--enable-native-access=ALL-UNNAMED",
+            "--add-opens", "java.base/jdk.internal.misc=ALL-UNNAMED",
+            "--add-opens", "java.base/java.nio=ALL-UNNAMED",
+            "-Dio.netty.tryReflectionSetAccessible=true"
+        )
+    }
+}
+
+application {
+    mainClass = "com.lezenford.telegram.ApplicationKt"
+    applicationDefaultJvmArgs = listOf(
+        "--enable-native-access=ALL-UNNAMED",
+        "--add-opens", "java.base/jdk.internal.misc=ALL-UNNAMED",
+        "--add-opens", "java.base/java.nio=ALL-UNNAMED",
+        "-Dio.netty.tryReflectionSetAccessible=true"
+    )
 }
 
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-actuator")
-    implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
-    implementation("org.springframework.boot:spring-boot-starter-webflux")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
-    implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
-    implementation("org.flywaydb:flyway-core")
-    runtimeOnly("org.postgresql:postgresql")
-    runtimeOnly("org.postgresql:r2dbc-postgresql")
-    implementation("org.telegram:telegrambots:6.8.0") {
-        exclude("commons-logging", "commons-logging")
-    }
-    implementation("io.netty:netty-resolver-dns-native-macos:4.1.100.Final:osx-aarch_64")
-    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("io.projectreactor:reactor-test")
+    implementation(libs.ktor.server.core)
+    implementation(libs.ktor.server.netty)
+    implementation(libs.logback.classic)
+    implementation(platform(libs.ydb.bom))
+    implementation(libs.ydb.sdk.auth)
+    implementation(libs.ydb.sdk.table)
+    implementation(libs.telegram.bot.api)
+    implementation(libs.retrofit)
 }
 
-tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        freeCompilerArgs += "-Xjsr305=strict"
-        jvmTarget = "21"
-    }
+val compileKotlin: KotlinCompile by tasks
+
+compileKotlin.compilerOptions {
+    freeCompilerArgs.set(listOf("-Xcontext-parameters"))
 }
 
-tasks.getByName<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
-    this.archiveFileName.set("${archiveBaseName.get()}.${archiveExtension.get()}")
-}
+tasks.register<Exec>("pushDockerImage") {
+    dependsOn("publishImageToLocalRegistry")
 
-tasks.register("dockerfile") {
-    dependsOn("bootJar")
-    doLast {
-        project.exec {
-            commandLine(
-                "docker", "build",
-                "-t", "cr.yandex/crp6rh6dggdnd2kedq1q/memoiry:$version",
-                "--platform=linux/amd64",
-                "."
-            )
-        }
-    }
-}
+    val imageName = "cr.yandex/crp7ivvonmm5cmci2uht/memoiry"
+    val imageTag = version.toString()
+    val fullImageName = "$imageName:$imageTag"
 
-tasks.register("pushImage") {
-    dependsOn("dockerfile")
-    doLast {
-        project.exec {
-            commandLine("docker", "push", "cr.yandex/crp6rh6dggdnd2kedq1q/memoiry:$version")
-        }
-    }
-}
-
-tasks.withType<Test> {
-    useJUnitPlatform()
+    commandLine("/opt/homebrew/bin/docker", "push", fullImageName)
 }

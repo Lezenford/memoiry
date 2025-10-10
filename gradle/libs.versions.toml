@@ -1,0 +1,22 @@
+[versions]
+kotlin = "2.2.20"
+ktor = "3.3.0"
+logback = "1.4.14"
+bot-api = "6.3.0"
+retrofit = "2.12.0"
+ydb = "2.3.21"
+
+[libraries]
+ktor-server-core = { module = "io.ktor:ktor-server-core-jvm", version.ref = "ktor" }
+ktor-server-netty = { module = "io.ktor:ktor-server-netty", version.ref = "ktor" }
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+telegram-bot-api = { module = "io.github.kotlin-telegram-bot.kotlin-telegram-bot:telegram", version.ref = "bot-api" }
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+ydb-bom = { module = "tech.ydb:ydb-sdk-bom", version.ref = "ydb" }
+ydb-sdk-auth = { module = "tech.ydb.auth:yc-auth-provider" }
+ydb-sdk-table = { module = "tech.ydb:ydb-sdk-table" }
+
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
