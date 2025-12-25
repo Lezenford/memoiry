@@ -2,8 +2,8 @@ package com.lezenford.telegram.memoiry
 
 import com.github.kotlintelegrambot.bot
 import com.lezenford.telegram.memoiry.bot.init
+import io.ktor.server.cio.CIO
 import io.ktor.server.engine.embeddedServer
-import io.ktor.server.netty.Netty
 import tech.ydb.auth.iam.CloudAuthHelper
 import tech.ydb.core.grpc.GrpcTransport
 import tech.ydb.core.grpc.GrpcTransportBuilder
@@ -25,7 +25,7 @@ fun main() {
                 ).build()
             ) {
                 context(bot { init() }.apply { startWebhook() }) {
-                    embeddedServer(Netty, port = Properties.port, module = { configureRouting() }).start(wait = true)
+                    embeddedServer(CIO, port = Properties.port, module = { configureRouting() }).start(wait = true)
                 }
             }
         }

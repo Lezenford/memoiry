@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "com.lezenford.telegram.memoiry"
-version = "2.0"
+version = "2.1"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_24
@@ -48,7 +48,7 @@ application {
 
 dependencies {
     implementation(libs.ktor.server.core)
-    implementation(libs.ktor.server.netty)
+    implementation(libs.ktor.server.cio)
     implementation(libs.logback.classic)
     implementation(platform(libs.ydb.bom))
     implementation(libs.ydb.sdk.auth)
